@@ -32,6 +32,7 @@
       </UForm>
     </div>
     <!-- <div class="grid grid-cols-3"></div> -->
+    <error ></error>
   </div>
 </template>
 
@@ -68,7 +69,6 @@ export default {
       return errors;
     },
     async onSubmit(e) {
-      console.log("auth:-", this.auth, e.data);
       this.loading = true;
       await $fetch(
         "https://e-commerce-pharmacy-74f9.onrender.com/api/user/login",
@@ -81,8 +81,7 @@ export default {
           },
         }
       )
-        .then((res) => {
-          console.log("res:-", res.data);
+        .then(async(res) => {
           localStorage.setItem('userId', res.data.id)
           localStorage.setItem('token', res.data.token)
           this.toast.add({
@@ -90,6 +89,7 @@ export default {
             description: res.message,
             icon: "i-heroicons-check-circle",
           });
+          await navigateTo({ path: '/' });
         })
         .finally(() => {
           this.loading = false;

@@ -1,15 +1,16 @@
 <template>
   <div>
+    <strong class="text-lg grid justify-items-center items-center py-2">Dashboard</strong>
+    <UDivider/>
     <div class="grid grid-cols-4 justify-items-center items-center p-3">
-      <!-- <UCard
+      <UCard
         class="grid grid-cols-1 mx-2 my-2"
         v-for="(item, key, index) in cards"
         :key="index"
       >
         <div class="grid grid-cols-12">{{ key }}</div>
         <div class="grid grid-cols-12">{{ cards[key] }}</div>
-      </UCard> -->
-      <Loader :loading="loading"/>
+      </UCard>
     </div>
   </div>
 </template>
