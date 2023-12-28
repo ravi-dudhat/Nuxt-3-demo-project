@@ -69,8 +69,9 @@
     </UTable>
     <UDivider />
 
-    <UModal v-model="isOpen" prevent-close>
+    <UModal v-model="isOpen" prevent-close class="min-w-full">
       <UCard
+        class="min-w-full overflow-y-auto"
         :ui="{
           ring: '',
           divide: 'divide-y divide-gray-100 dark:divide-gray-800',
@@ -96,9 +97,9 @@
         <UForm
           :state="productDetails"
           @submit="saveProduct"
-          class="grid grid-cols-2 gap-3"
+          class="grid grid-cols-3 gap-x-3"
         >
-          <UFormGroup label="Product name" name="name" class="my-2">
+          <UFormGroup label="Product name" required class="my-2">
             <UInput v-model="productDetails.name" />
           </UFormGroup>
 
@@ -106,10 +107,11 @@
             label="Product description"
             name="description"
             class="my-2"
+            required
           >
             <UInput v-model="productDetails.description" />
           </UFormGroup>
-          <UFormGroup label="Category" name="name" class="my-2">
+          <UFormGroup label="Category" name="name" class="my-2" required>
             <USelectMenu
               v-model="categoryDetails"
               :options="categoryList"
@@ -129,20 +131,62 @@
               </template>
             </USelectMenu>
           </UFormGroup>
-          <UFormGroup label="Price" name="name" class="my-2">
-            <UInput v-model="productDetails.name" />
+          <UFormGroup label="Price" required class="my-2">
+            <UInput v-model="productDetails.price" />
           </UFormGroup>
-          <UFormGroup label="Quantity" name="name" class="my-2">
-            <UInput v-model="productDetails.name" />
+          <UFormGroup label="Quantity" required class="my-2">
+            <UInput v-model="productDetails.quantity" />
           </UFormGroup>
-          <UFormGroup label="Meta title" name="name" class="my-2">
-            <UInput v-model="productDetails.name" />
+          <UFormGroup label="Meta title" required class="my-2">
+            <UInput v-model="productDetails.metaTitle" />
           </UFormGroup>
-          <UFormGroup label="Meta description" name="name" class="my-2">
-            <UInput v-model="productDetails.name" />
+          <UFormGroup label="Meta description" class="my-2">
+            <UInput v-model="productDetails.metaDescription" />
           </UFormGroup>
-          <UFormGroup label="Meta keyword" name="name" class="my-2">
-            <UInput v-model="productDetails.name" />
+          <UFormGroup label="Meta keyword" class="my-2">
+            <UInput v-model="productDetails.metaKeyword" />
+          </UFormGroup>
+          <UFormGroup label="Composition" required class="my-2">
+            <UInput v-model="productDetails.composition" />
+          </UFormGroup>
+          <UFormGroup label="Presentation" required class="my-2">
+            <UInput v-model="productDetails.presentation" />
+          </UFormGroup>
+          <UFormGroup label="Storage" required class="my-2">
+            <UInput v-model="productDetails.storage" />
+          </UFormGroup>
+          <UFormGroup label="Indication" required class="my-2">
+            <UInput v-model="productDetails.indication" />
+          </UFormGroup>
+          <UFormGroup label="Dose" required class="my-2">
+            <UInput v-model="productDetails.dose" />
+          </UFormGroup>
+          <UFormGroup label="Shelf life" required class="my-2">
+            <UInput v-model="productDetails.shelfLife" />
+          </UFormGroup>
+          <UFormGroup label="Image" class="my-2">
+            <UInput
+              v-model="productDetails.image"
+              type="file"
+              @change="onChangeImage($event)"
+            />
+
+            <UButton
+              :loading="loading"
+              type="submit"
+              class="justify-items-center"
+              label="Upload"
+              @click="uploadImage($event)"
+            >
+            </UButton>
+          </UFormGroup>
+          <UFormGroup class="my-2">
+            <URadioGroup
+              v-model="productDetails.prescriptionRequired"
+              legend="Does Prescription required for product?"
+              :options="prescriptionOptions"
+              required
+            />
           </UFormGroup>
         </UForm>
 
@@ -173,6 +217,18 @@ export default {
   },
   data() {
     return {
+      imageData: null,
+      token: null,
+      prescriptionOptions: [
+        {
+          value: 1,
+          label: "Yes",
+        },
+        {
+          value: 0,
+          label: "No",
+        },
+      ],
       categoryDetails: null,
       isOpen: false,
       search: null,
@@ -250,11 +306,11 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    let token = localStorage.getItem("token");
+    this.token = localStorage.getItem("token");
     await $fetch(
       "https://e-commerce-pharmacy-74f9.onrender.com/api/product/listOfProducts",
       {
-        headers: { Authorization: `${token}` },
+        headers: { Authorization: `${this.token}` },
         method: "POST",
         body: {
           pageNumber: 1,
@@ -274,7 +330,7 @@ export default {
     await $fetch(
       "https://e-commerce-pharmacy-74f9.onrender.com/api/category/listOfCategory",
       {
-        headers: { Authorization: `${token}` },
+        headers: { Authorization: `${this.token}` },
         method: "POST",
         body: {
           model: "Category",
@@ -294,43 +350,70 @@ export default {
     addEditProduct() {
       this.isOpen = true;
     },
-    async saveProduct() {
+    onChangeImage(e) {
+      this.imageData = e.target.files;
+      console.log("Change Imgae:-", this.productDetails.image);
+    },
+    async uploadImage(e) {
+      let formData = new FormData();
+      formData.append("image", this.imageData[0]);
+      console.log("Imgae:-", this.imageData[0], formData);
+
       await $fetch(
-        "https://e-commerce-pharmacy-74f9.onrender.com/api/product/addProduct",
+        "https://e-commerce-pharmacy-74f9.onrender.com/api/vendor/productImage",
         {
-          headers: { Authorization: `${token}` },
-          method: "POST",
-          body: {
-            category_id: productDetails.category,
-            composition: productDetails.composition,
-            description: productDetails.description,
-            dose: productDetails.dose,
-            image: productDetails.image,
-            indication: productDetails.indication,
-            is_prescription: productDetails.prescriptionRequired,
-            metaTagTitle: productDetails.metaTagTitle,
-            name: productDetails.name,
-            presentation: productDetails.presentation,
-            price: productDetails.price,
-            quantity: productDetails.quantity,
-            referral_code: productDetails.referral_code,
-            selectedImage: productDetails.image,
-            shelf_life: productDetails.shelfLife,
-            storage: productDetails.storage,
-            vendor_id: productDetails.vendor_id,
+          headers: {
+            Authorization: `${this.token}`,
           },
+          body: formData,
+          method: "POST",
         }
       )
         .then((res) => {
-          this.toast.add({
-            title: "Product",
-            description: res.message,
-            icon: "i-heroicons-check-circle",
-          });
+          this.productDetails.image = res.data;
+          console.log("Image:-", this.productDetails);
         })
         .finally(() => {
           this.loading = false;
         });
+    },
+    async saveProduct() {
+      // await $fetch(
+      //   "https://e-commerce-pharmacy-74f9.onrender.com/api/product/addProduct",
+      //   {
+      //     headers: { Authorization: `${this.token}` },
+      //     method: "POST",
+      //     body: {
+      //       category_id: productDetails.category,
+      //       composition: productDetails.composition,
+      //       description: productDetails.description,
+      //       dose: productDetails.dose,
+      //       image: productDetails.image,
+      //       indication: productDetails.indication,
+      //       is_prescription: productDetails.prescriptionRequired,
+      //       metaTagTitle: productDetails.metaTagTitle,
+      //       name: productDetails.name,
+      //       presentation: productDetails.presentation,
+      //       price: productDetails.price,
+      //       quantity: productDetails.quantity,
+      //       referral_code: productDetails.referral_code,
+      //       selectedImage: productDetails.image,
+      //       shelf_life: productDetails.shelfLife,
+      //       storage: productDetails.storage,
+      //       vendor_id: productDetails.vendor_id,
+      //     },
+      //   }
+      // )
+      //   .then((res) => {
+      //     this.toast.add({
+      //       title: "Product",
+      //       description: res.message,
+      //       icon: "i-heroicons-check-circle",
+      //     });
+      //   })
+      //   .finally(() => {
+      //     this.loading = false;
+      //   });
     },
   },
 };
