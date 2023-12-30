@@ -83,7 +83,7 @@ export default {
       )
         .then(async(res) => {
           localStorage.setItem('userId', res.data.id)
-          localStorage.setItem('token', res.data.token)
+          sessionStorage.setItem('token', res.data.token)
           this.toast.add({
             title: "Authenticated",
             description: res.message,

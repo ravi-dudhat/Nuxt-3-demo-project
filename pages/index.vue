@@ -1,7 +1,9 @@
 <template>
   <div>
-    <strong class="text-lg grid justify-items-center items-center py-2">Dashboard</strong>
-    <UDivider/>
+    <strong class="text-lg grid justify-items-center items-center py-2"
+      >Dashboard</strong
+    >
+    <UDivider />
     <div class="grid grid-cols-4 justify-items-center items-center p-3">
       <UCard
         class="grid grid-cols-1 mx-2 my-2"
@@ -26,20 +28,25 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    let token = localStorage.getItem("token");
-    await $fetch(
-      "https://e-commerce-pharmacy-74f9.onrender.com/api/admin/dashBoard/countOfData",
-      {
-        headers: { Authorization: `${token}` },
-        method: "GET",
-      }
-    )
-      .then((res) => {
-        this.cards = res.data;
-      })
-      .finally(() => {
-        this.loading = false;
-      });
+    let token = sessionStorage.getItem("token");
+    if (token) {
+      await $fetch(
+        "https://e-commerce-pharmacy-74f9.onrender.com/api/admin/dashBoard/countOfData",
+        {
+          headers: { Authorization: `${token}` },
+          method: "GET",
+        }
+      )
+        .then((res) => {
+          this.cards = res.data;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    }
+    else {
+      await navigateTo({ path: '/Login' });
+    }
   },
 };
 </script>
